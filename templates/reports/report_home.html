@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Reports | NOLELO{% endblock %}
+{% block page_title %}Reports{% endblock %}
+{% block content %}
+<div class="hero-card mb-4">
+  <div>
+    <div class="eyebrow">Exports and summaries</div>
+    <h2 class="display-6 fw-bold mb-2">Reporting workspace</h2>
+    <p class="text-secondary mb-0">Download filtered operational data in CSV format for audits, meetings, and offline analysis.</p>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-md-6">
+    <div class="glass-card p-4 h-100">
+      <h5>Usage Entries</h5>
+      <p class="text-secondary">Export operational water entries for reconciliation and offline analysis.</p>
+      <a class="btn btn-primary" href="{% url 'reports:entries-csv' %}">Download Usage CSV</a>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="glass-card p-4 h-100">
+      <h5>Bills</h5>
+      <p class="text-secondary">Export generated bills and billing summaries for finance and audit review.</p>
+      <a class="btn btn-primary" href="{% url 'reports:bills-csv' %}">Download Bills CSV</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

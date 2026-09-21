@@ -1,0 +1,112 @@
+{% load static humanize %}
+<!doctype html>
+<html lang="en" data-theme="{{ theme_preference }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="{{ csrf_token }}">
+  <title>{% block title %}{{ system_name }}{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="{% static 'css/app.css' %}" rel="stylesheet">
+  {% block extra_css %}{% endblock %}
+</head>
+<body class="app-body">
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand-card">
+        <div class="brand-mark">N</div>
+        <div>
+          <div class="brand-title">NOLELO</div>
+          <div class="brand-subtitle">Clean Water Supply</div>
+        </div>
+      </div>
+      <nav class="sidebar-nav">
+        <a class="nav-link-custom {% if request.resolver_match.url_name == 'home' %}active{% endif %}" href="{% url 'dashboard:home' %}">
+          <i class="bi bi-speedometer2"></i> Dashboard
+        </a>
+        {% if user.is_authenticated and user.role == 'worker' %}
+          <a class="nav-link-custom {% if request.resolver_match.app_name == 'water' %}active{% endif %}" href="{% url 'water:history' %}">
+            <i class="bi bi-water"></i> My History
+          </a>
+          <a class="nav-link-custom {% if request.resolver_match.app_name == 'notifications' %}active{% endif %}" href="{% url 'notifications:notification-list' %}">
+            <i class="bi bi-bell"></i> Notifications
+            {% if notification_unread_count %}<span class="badge rounded-pill text-bg-danger ms-auto">{{ notification_unread_count }}</span>{% endif %}
+          </a>
+          <a class="nav-link-custom {% if request.resolver_match.app_name == 'accounts' and request.resolver_match.url_name == 'profile' %}active{% endif %}" href="{% url 'accounts:profile' %}">
+            <i class="bi bi-person-circle"></i> Profile
+          </a>
+        {% endif %}
+        {% if user.is_authenticated and user.is_staff %}
+          <a class="nav-link-custom {% if request.resolver_match.url_name == 'admin' %}active{% endif %}" href="{% url 'dashboard:admin' %}">
+            <i class="bi bi-grid-1x2"></i> Admin Dashboard
+          </a>
+          <a class="nav-link-custom {% if request.resolver_match.app_name == 'billing' %}active{% endif %}" href="{% url 'billing:bill-list' %}">
+            <i class="bi bi-receipt"></i> Bills
+          </a>
+          <a class="nav-link-custom {% if request.resolver_match.app_name == 'reports' %}active{% endif %}" href="{% url 'reports:report-home' %}">
+            <i class="bi bi-bar-chart"></i> Reports
+          </a>
+          <a class="nav-link-custom {% if request.resolver_match.app_name == 'audit' %}active{% endif %}" href="{% url 'audit:audit-list' %}">
+            <i class="bi bi-shield-check"></i> Audit Logs
+          </a>
+          <a class="nav-link-custom" href="/admin/">
+            <i class="bi bi-gear"></i> System Admin
+          </a>
+        {% endif %}
+      </nav>
+      <div class="sidebar-footer">
+        <div class="small text-uppercase text-muted">Theme</div>
+        <button type="button" class="btn btn-outline-light btn-sm w-100 theme-toggle" data-theme-toggle>
+          <i class="bi bi-moon-stars"></i>
+          <span>Toggle Dark Mode</span>
+        </button>
+      </div>
+    </aside>
+
+    <main class="main-shell">
+      <header class="topbar">
+        <div>
+          <div class="eyebrow">{% block eyebrow %}Enterprise Water Operations{% endblock %}</div>
+          <h1 class="page-title mb-0">{% block page_title %}{{ title|default:system_name }}{% endblock %}</h1>
+        </div>
+        <div class="topbar-actions">
+          {% if user.is_authenticated %}
+            <a class="btn btn-soft" href="{% url 'notifications:notification-list' %}">
+              <i class="bi bi-bell"></i>
+              <span>Notifications</span>
+              {% if notification_unread_count %}<span class="badge text-bg-danger ms-2">{{ notification_unread_count }}</span>{% endif %}
+            </a>
+            <div class="dropdown">
+              <button class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                {{ user.welcome_name|default:user.first_name }}
+              </button>
+              <ul class="dropdown-menu dropdown-menu-end shadow border-0">
+                <li><h6 class="dropdown-header">{{ user.official_full_name }}</h6></li>
+                <li><a class="dropdown-item" href="{% url 'accounts:profile' %}">My Profile</a></li>
+                <li><a class="dropdown-item" href="{% url 'accounts:change-pin' %}">Change PIN</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="{% url 'accounts:logout' %}">Logout</a></li>
+              </ul>
+            </div>
+          {% else %}
+            <a class="btn btn-primary" href="{% url 'accounts:login' %}">Login</a>
+          {% endif %}
+        </div>
+      </header>
+
+      <section class="content-shell">
+        {% include "partials/messages.html" %}
+        {% block content %}{% endblock %}
+      </section>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="{% static 'js/app.js' %}"></script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

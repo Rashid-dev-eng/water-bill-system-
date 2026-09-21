@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% block title %}Administrator Dashboard | NOLELO{% endblock %}
+{% block page_title %}Administrator Dashboard{% endblock %}
+{% block content %}
+<div class="hero-card mb-4">
+  <div>
+    <div class="eyebrow">Operations at a glance</div>
+    <h2 class="display-6 fw-bold mb-2">Today’s control center</h2>
+    <p class="text-secondary mb-0">Monitor usage, activity, billing, and site performance from one place.</p>
+  </div>
+  <div class="hero-actions">
+    <a href="{% url 'billing:bill-generate' %}" class="btn btn-primary">Generate Bill</a>
+    <a href="{% url 'reports:report-home' %}" class="btn btn-soft">Open Reports</a>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-3"><div class="stat-card"><span>Today Usage</span><strong>{{ today_usage|floatformat:3 }} m3</strong></div></div>
+  <div class="col-md-3"><div class="stat-card"><span>This Week</span><strong>{{ week_usage|floatformat:3 }} m3</strong></div></div>
+  <div class="col-md-3"><div class="stat-card"><span>This Month</span><strong>{{ month_usage|floatformat:3 }} m3</strong></div></div>
+  <div class="col-md-3"><div class="stat-card"><span>This Year</span><strong>{{ year_usage|floatformat:3 }} m3</strong></div></div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-4"><div class="stat-card alt"><span>Active Workers</span><strong>{{ active_workers }}</strong></div></div>
+  <div class="col-md-4"><div class="stat-card alt"><span>Active Sites</span><strong>{{ active_sites }}</strong></div></div>
+  <div class="col-md-4"><div class="stat-card alt"><span>Active Categories</span><strong>{{ active_categories }}</strong></div></div>
+</div>
+
+<div class="row g-4 mb-4">
+  <div class="col-xl-7">
+    <div class="glass-card p-4 h-100">
+      <div class="d-flex align-items-center justify-content-between mb-3">
+        <h5 class="mb-0">Weekly Usage Trend</h5>
+        <span class="badge text-bg-info">Last 7 days</span>
+      </div>
+      <canvas id="weeklyChart" height="120"></canvas>
+    </div>
+  </div>
+  <div class="col-xl-5">
+    <div class="glass-card p-4 h-100">
+      <h5 class="mb-3">Top Consuming Sites</h5>
+      <div class="table-responsive">
+        <table class="table table-sm align-middle">
+          <thead><tr><th>Site</th><th class="text-end">Consumption</th></tr></thead>
+          <tbody>
+            {% for site in top_sites %}
+              <tr>
+                <td>{{ site.site__name }}<div class="text-secondary small">{{ site.category__name }}</div></td>
+                <td class="text-end fw-semibold">{{ site.total_consumption|floatformat:3 }}</td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="2" class="text-secondary">No data available yet.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4 mb-4">
+  <div class="col-xl-7">
+    <div class="glass-card p-4 h-100">
+      <h5 class="mb-3">Monthly Usage Trend</h5>
+      <canvas id="monthlyChart" height="120"></canvas>
+    </div>
+  </div>
+  <div class="col-xl-5">
+    <div class="glass-card p-4 h-100">
+      <h5 class="mb-3">Most Active Workers</h5>
+      <div class="table-responsive">
+        <table class="table table-sm align-middle">
+          <thead><tr><th>Worker</th><th class="text-end">Entries</th><th class="text-end">Consumption</th></tr></thead>
+          <tbody>
+            {% for worker in top_workers %}
+              <tr>
+                <td>{{ worker.worker__first_name }} {{ worker.worker__last_name }}</td>
+                <td class="text-end">{{ worker.entry_count }}</td>
+                <td class="text-end fw-semibold">{{ worker.total_consumption|floatformat:3 }}</td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="3" class="text-secondary">No activity yet.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-6">
+    <div class="glass-card p-4 h-100">
+      <h5 class="mb-3">Recent Bills</h5>
+      <div class="table-responsive">
+        <table class="table table-sm align-middle">
+          <thead><tr><th>Bill</th><th>Scope</th><th class="text-end">Amount</th></tr></thead>
+          <tbody>
+            {% for bill in recent_bills %}
+              <tr>
+                <td><a href="{% url 'billing:bill-detail' bill.pk %}">{{ bill.bill_number }}</a><div class="text-secondary small">{{ bill.date_generated|date:"Y-m-d H:i" }}</div></td>
+                <td>{{ bill.get_scope_display }}</td>
+                <td class="text-end fw-semibold">{{ bill.total_amount|floatformat:2 }}</td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="3" class="text-secondary">No bills generated yet.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="glass-card p-4 h-100">
+      <h5 class="mb-3">Recent Activities</h5>
+      <div class="timeline">
+        {% for event in recent_audits %}
+          <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div>
+              <div class="fw-semibold">{{ event.action }}</div>
+              <div class="small text-secondary">
+                {{ event.actor.display_name|default:"System" }} · {{ event.created_at|date:"Y-m-d H:i" }} · {{ event.object_repr|default:"-" }}
+              </div>
+            </div>
+          </div>
+        {% empty %}
+          <div class="text-secondary">No audit activity yet.</div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+{{ today_series|json_script:"today-series" }}
+{{ month_series|json_script:"month-series" }}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script>
+  const weekly = JSON.parse(document.getElementById('today-series').textContent);
+  const monthly = JSON.parse(document.getElementById('month-series').textContent);
+  const chartConfig = (labels, values) => ({
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Consumption m3',
+        data: values,
+        borderColor: '#0ea5e9',
+        backgroundColor: 'rgba(14, 165, 233, 0.12)',
+        tension: 0.35,
+        fill: true,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: { y: { beginAtZero: true } }
+    }
+  });
+  new Chart(document.getElementById('weeklyChart'), chartConfig(weekly.labels, weekly.values));
+  new Chart(document.getElementById('monthlyChart'), chartConfig(monthly.labels, monthly.values));
+</script>
+{% endblock %}

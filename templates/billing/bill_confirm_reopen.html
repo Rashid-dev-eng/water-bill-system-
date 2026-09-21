@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Reopen Bill | NOLELO{% endblock %}
+{% block page_title %}Reopen Bill{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-6">
+    <div class="glass-card p-4">
+      <p>Reopen <strong>{{ bill.bill_number }}</strong>? This will mark it as reopened and keep the historical record intact.</p>
+      <form method="post">
+        {% csrf_token %}
+        <div class="d-flex gap-2">
+          <button class="btn btn-warning" type="submit">Reopen</button>
+          <a class="btn btn-soft" href="{% url 'billing:bill-detail' bill.pk %}">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

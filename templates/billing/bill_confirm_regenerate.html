@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Regenerate Bill | NOLELO{% endblock %}
+{% block page_title %}Regenerate Bill{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-6">
+    <div class="glass-card p-4">
+      <p>Generate a fresh version of <strong>{{ bill.bill_number }}</strong> using the current tariff and usage configuration.</p>
+      <form method="post">
+        {% csrf_token %}
+        <div class="d-flex gap-2">
+          <button class="btn btn-info" type="submit">Regenerate</button>
+          <a class="btn btn-soft" href="{% url 'billing:bill-detail' bill.pk %}">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

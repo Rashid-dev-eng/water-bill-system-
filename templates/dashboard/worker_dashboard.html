@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% block title %}Worker Dashboard | NOLELO{% endblock %}
+{% block page_title %}Worker Dashboard{% endblock %}
+{% block content %}
+<div class="hero-card mb-4">
+  <div>
+    <div class="eyebrow">Welcome back</div>
+    <h2 class="display-6 fw-bold mb-2">Welcome, {{ welcome_name }}</h2>
+    <p class="text-secondary mb-0">Record readings quickly, review your history, and keep your assigned sites in view.</p>
+  </div>
+  <div class="hero-actions">
+    <a href="{% url 'water:history' %}" class="btn btn-primary">View History</a>
+    <a href="{% url 'accounts:profile' %}" class="btn btn-soft">Edit Profile</a>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-4"><div class="stat-card"><span>Today’s Entries</span><strong>{{ today_entries.count }}</strong></div></div>
+  <div class="col-md-4"><div class="stat-card alt"><span>This Month</span><strong>{{ month_usage|floatformat:3 }} m3</strong></div></div>
+  <div class="col-md-4"><div class="stat-card alt"><span>Assigned Sites</span><strong>{{ assigned_sites.count }}</strong></div></div>
+</div>
+
+<div class="row g-4">
+  <div class="col-xl-7">
+    <div class="glass-card p-4">
+      <div class="d-flex align-items-center justify-content-between mb-3">
+        <h5 class="mb-0">Quick Entry</h5>
+        <span class="badge text-bg-success">{{ assigned_sites.count }} authorized site(s)</span>
+      </div>
+      <div class="accordion accordion-flush" id="quickEntryAccordion">
+        {% for item in quick_forms %}
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="heading{{ item.site.pk }}">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ item.site.pk }}">
+                <div class="w-100 d-flex justify-content-between align-items-center pe-3">
+                  <span>{{ item.site.display_label }}</span>
+                  <small class="text-secondary">{{ item.site.location|default:"Location not set" }}</small>
+                </div>
+              </button>
+            </h2>
+            <div id="collapse{{ item.site.pk }}" class="accordion-collapse collapse" data-bs-parent="#quickEntryAccordion">
+              <div class="accordion-body">
+                <form method="post" action="{% url 'water:entry-create' item.site.pk %}" class="entry-form">
+                  {% csrf_token %}
+                  <div class="row g-3">
+                    <div class="col-md-4">
+                      <label class="form-label">{{ item.form.entry_date.label }}</label>
+                      {{ item.form.entry_date }}
+                    </div>
+                    <div class="col-md-4">
+                      <label class="form-label">{{ item.form.morning_reading.label }}</label>
+                      {{ item.form.morning_reading }}
+                    </div>
+                    <div class="col-md-4">
+                      <label class="form-label">{{ item.form.evening_reading.label }}</label>
+                      {{ item.form.evening_reading }}
+                    </div>
+                    <div class="col-12">
+                      <label class="form-label">{{ item.form.notes.label }}</label>
+                      {{ item.form.notes }}
+                    </div>
+                    {{ item.form.shift }}
+                  </div>
+                  <div class="mt-3">
+                    <button class="btn btn-primary" type="submit">Save Entry</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        {% empty %}
+          <div class="text-secondary">No sites have been assigned yet.</div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  <div class="col-xl-5">
+    <div class="glass-card p-4 mb-4">
+      <h5 class="mb-3">Assigned Sites</h5>
+      <div class="stack-list">
+        {% for site in assigned_sites %}
+          <div class="stack-card">
+            <div>
+              <div class="fw-semibold">{{ site.display_label }}</div>
+              <div class="text-secondary small">{{ site.location|default:"Location not set" }}</div>
+            </div>
+            <span class="badge text-bg-light">{{ site.category.name }}</span>
+          </div>
+        {% empty %}
+          <div class="text-secondary">No assigned sites.</div>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="glass-card p-4">
+      <h5 class="mb-3">Recent Entries</h5>
+      <div class="table-responsive">
+        <table class="table table-sm align-middle">
+          <thead><tr><th>Date</th><th>Site</th><th class="text-end">Consumption</th></tr></thead>
+          <tbody>
+            {% for entry in recent_entries %}
+              <tr>
+                <td>{{ entry.entry_date }}</td>
+                <td>{{ entry.site.name }}</td>
+                <td class="text-end fw-semibold">{{ entry.consumption_m3|floatformat:3 }}</td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="3" class="text-secondary">No entries yet.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

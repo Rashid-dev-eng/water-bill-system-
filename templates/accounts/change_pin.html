@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Change PIN | NOLELO{% endblock %}
+{% block page_title %}Change PIN{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-6">
+    <div class="glass-card p-4">
+      <p class="text-secondary mb-4">Use a new four-digit PIN to secure your account.</p>
+      <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+          <label class="form-label">{{ form.current_pin.label }}</label>
+          {{ form.current_pin }}
+          {{ form.current_pin.errors }}
+        </div>
+        <div class="mb-3">
+          <label class="form-label">{{ form.new_pin.label }}</label>
+          {{ form.new_pin }}
+          {{ form.new_pin.errors }}
+        </div>
+        <div class="mb-3">
+          <label class="form-label">{{ form.confirm_pin.label }}</label>
+          {{ form.confirm_pin }}
+          {{ form.confirm_pin.errors }}
+        </div>
+        <button class="btn btn-primary" type="submit">Update PIN</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

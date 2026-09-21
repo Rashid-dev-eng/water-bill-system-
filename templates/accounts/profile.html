@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}My Profile | NOLELO{% endblock %}
+{% block page_title %}My Profile{% endblock %}
+{% block content %}
+<div class="row g-4">
+  <div class="col-xl-4">
+    <div class="glass-card p-4 h-100">
+      <div class="d-flex align-items-center gap-3">
+        <div class="avatar-xl">
+          {% if user_profile.profile_picture %}
+            <img src="{{ user_profile.profile_picture.url }}" alt="{{ user_profile.display_name }}">
+          {% else %}
+            <span>{{ user_profile.first_name|slice:":1" }}{{ user_profile.last_name|slice:":1" }}</span>
+          {% endif %}
+        </div>
+        <div>
+          <h3 class="mb-1">{{ user_profile.display_name }}</h3>
+          <div class="text-secondary">{{ user_profile.get_role_display }}</div>
+        </div>
+      </div>
+      <hr>
+      <div class="small text-uppercase text-secondary mb-2">Account details</div>
+      <div class="d-grid gap-2">
+        <div class="detail-chip"><span>Email</span><strong>{{ user_profile.email }}</strong></div>
+        <div class="detail-chip"><span>Phone</span><strong>{{ user_profile.phone }}</strong></div>
+        <div class="detail-chip"><span>Nickname</span><strong>{{ user_profile.nickname|default:"-" }}</strong></div>
+      </div>
+    </div>
+  </div>
+  <div class="col-xl-8">
+    <div class="glass-card p-4">
+      <h4 class="mb-3">Update Contact Information</h4>
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label">{{ form.email.label }}</label>
+            {{ form.email }}
+            {{ form.email.errors }}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">{{ form.phone.label }}</label>
+            {{ form.phone }}
+            {{ form.phone.errors }}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">{{ form.nickname.label }}</label>
+            {{ form.nickname }}
+            {{ form.nickname.errors }}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">{{ form.profile_picture.label }}</label>
+            {{ form.profile_picture }}
+            {{ form.profile_picture.errors }}
+          </div>
+        </div>
+        <div class="mt-4 d-flex gap-2">
+          <button class="btn btn-primary" type="submit">Save Profile</button>
+          <a class="btn btn-soft" href="{% url 'accounts:change-pin' %}">Change PIN</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

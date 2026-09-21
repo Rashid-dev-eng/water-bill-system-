@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Bill {{ bill.bill_number }} | NOLELO{% endblock %}
+{% block page_title %}Bill {{ bill.bill_number }}{% endblock %}
+{% block content %}
+<div class="hero-card mb-4">
+  <div>
+    <div class="eyebrow">Billing record</div>
+    <h2 class="display-6 fw-bold mb-2">{{ bill.bill_number }}</h2>
+    <p class="text-secondary mb-0">Generated on {{ bill.date_generated|date:"Y-m-d H:i" }} for {{ bill.period_start }} to {{ bill.period_end }}</p>
+  </div>
+  <div class="hero-actions">
+    <a class="btn btn-primary" href="{% url 'billing:bill-pdf' bill.pk %}">Download PDF</a>
+    <a class="btn btn-soft" href="{% url 'billing:bill-list' %}">Back</a>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-3"><div class="stat-card"><span>Consumption</span><strong>{{ bill.total_consumption }} m3</strong></div></div>
+  <div class="col-md-3"><div class="stat-card alt"><span>Total Amount</span><strong>{{ bill.total_amount }}</strong></div></div>
+  <div class="col-md-3"><div class="stat-card alt"><span>Scope</span><strong>{{ bill.get_scope_display }}</strong></div></div>
+  <div class="col-md-3"><div class="stat-card"><span>Status</span><strong>{{ bill.get_status_display }}</strong></div></div>
+</div>
+
+<div class="glass-card p-4 mb-4">
+  <div class="row g-3">
+    <div class="col-md-4"><div class="detail-chip"><span>Worker</span><strong>{{ bill.worker_name|default:"-" }}</strong></div></div>
+    <div class="col-md-4"><div class="detail-chip"><span>Category</span><strong>{{ bill.category_name|default:"-" }}</strong></div></div>
+    <div class="col-md-4"><div class="detail-chip"><span>Site</span><strong>{{ bill.site_name|default:"-" }}</strong></div></div>
+  </div>
+  <div class="mt-4 d-flex flex-wrap gap-2">
+    <a class="btn btn-soft" href="{% url 'billing:bill-pdf' bill.pk %}">Print / Download</a>
+    <form method="post" action="{% url 'billing:bill-reopen' bill.pk %}" class="d-inline">
+      {% csrf_token %}
+      <button class="btn btn-outline-warning" type="submit" data-confirm="Reopen this bill?">Reopen</button>
+    </form>
+    <form method="post" action="{% url 'billing:bill-regenerate' bill.pk %}" class="d-inline">
+      {% csrf_token %}
+      <button class="btn btn-outline-info" type="submit" data-confirm="Regenerate this bill?">Regenerate</button>
+    </form>
+  </div>
+</div>
+
+<div class="glass-card p-4">
+  <h5 class="mb-3">Tariff Breakdown</h5>
+  <div class="table-responsive">
+    <table class="table align-middle">
+      <thead><tr><th>#</th><th>Tariff</th><th class="text-end">Volume</th><th class="text-end">Rate</th><th class="text-end">Amount</th></tr></thead>
+      <tbody>
+        {% for line in bill.lines.all %}
+          <tr>
+            <td>{{ line.position }}</td>
+            <td>{{ line.tariff_name }}</td>
+            <td class="text-end">{{ line.volume }}</td>
+            <td class="text-end">{{ line.unit_rate }}</td>
+            <td class="text-end fw-semibold">{{ line.amount }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="5" class="text-secondary">No tariff lines were generated.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="mt-4">
+    <strong>Notes:</strong> {{ bill.notes|default:"No additional notes." }}
+  </div>
+</div>
+{% endblock %}
